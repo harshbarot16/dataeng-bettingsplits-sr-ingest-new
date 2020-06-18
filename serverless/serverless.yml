@@ -1,0 +1,87 @@
+service: datatech-futures-wh-sls
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: python3.7
+  tracing:
+    lambda: true
+  environment:
+    HANDLER: src/handler/get_futures.get_futures
+    SCHEDULE: rate(1 hour)
+    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}-endpoint-hash-table
+    BUCKET: ${self:service}-${opt:stage, self:provider.stage}
+    XAPIKEY: 'mY0kp8q5a0XZjJMMO5XgSahREQ7PaUxkGluWiLPi'
+  stage: ${opt:stage, 'dev'}
+  region: us-east-1
+  timeout: 60
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:GetObject
+      Resource: 'arn:aws:s3:::${self:provider.environment.BUCKET}/*'
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}'
+
+
+functions:
+  # NFL
+  nfl:
+    handler: ${self:provider.environment.HANDLER}
+    environment:
+      WH_API: 'https://odds.us.williamhill.com/api/v1/events?competitionId=007d7c61-07a7-4e18-bb40-15104b6eac92'
+    events:
+      - schedule: ${self:provider.environment.SCHEDULE}
+
+  # MLB
+  mlb:
+    handler: ${self:provider.environment.HANDLER}
+    environment:
+    events:
+      - schedule: ${self:provider.environment.SCHEDULE}
+
+  # NBA
+  nba:
+    handler: ${self:provider.environment.HANDLER}
+    environment:
+    events:
+      - schedule: ${self:provider.environment.SCHEDULE}
+
+  # NHL
+  nhl:
+    handler: ${self:provider.environment.HANDLER}
+    environment:
+    events:
+
+resources:
+  Resources:
+    whBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.environment.BUCKET}
+    endpointHashTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        AttributeDefinitions:
+          -
+            AttributeName: endpoint
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: endpoint
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
