@@ -1,4 +1,4 @@
-service: datatech-futures-wh-sls
+service: dataeng-futures-wh-sls
 
 package:
   individually: true
