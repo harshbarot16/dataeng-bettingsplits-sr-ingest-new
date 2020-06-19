@@ -10,7 +10,7 @@ provider:
     lambda: true
   environment:
     HANDLER: src/handler/get_futures.get_futures
-    SCHEDULE: rate(1 hour)
+    SCHEDULE: rate(3 hour)
     DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}-endpoint-hash-table
     BUCKET: ${self:service}-${opt:stage, self:provider.stage}
     XAPIKEY: 'mY0kp8q5a0XZjJMMO5XgSahREQ7PaUxkGluWiLPi'
@@ -43,26 +43,6 @@ functions:
       WH_API: 'https://odds.us.williamhill.com/api/v1/events?competitionId=007d7c61-07a7-4e18-bb40-15104b6eac92'
     events:
       - schedule: ${self:provider.environment.SCHEDULE}
-
-  # MLB
-  mlb:
-    handler: ${self:provider.environment.HANDLER}
-    environment:
-    events:
-      - schedule: ${self:provider.environment.SCHEDULE}
-
-  # NBA
-  nba:
-    handler: ${self:provider.environment.HANDLER}
-    environment:
-    events:
-      - schedule: ${self:provider.environment.SCHEDULE}
-
-  # NHL
-  nhl:
-    handler: ${self:provider.environment.HANDLER}
-    environment:
-    events:
 
 resources:
   Resources:

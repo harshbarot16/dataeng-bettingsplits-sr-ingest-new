@@ -29,20 +29,20 @@ def fix_dynamodb():
     """ dynamodb """
     with mock_dynamodb2():
         boto3.client("dynamodb").create_table(
-            TableName="endpoint-hash-table",
+            TableName="wh-endpoint-hash-table",
             KeySchema=[{"AttributeName": "endpoint", "KeyType": "HASH"},],
             AttributeDefinitions=[{"AttributeName": "endpoint", "AttributeType": "S"},],
             ProvisionedThroughput={"ReadCapacityUnits": 1, "WriteCapacityUnits": 1},
         )
         yield boto3.resource("dynamodb", region_name="us-east-1").Table(
-            "endpoint-hash-table"
+            "wh-endpoint-hash-table"
         )
 
 
 @pytest.fixture(name="environ", scope="session")
 def fix_environ():
     """ environ """
-    os.environ["DYNAMODB_TABLE"] = "endpoint-hash-table"
+    os.environ["DYNAMODB_TABLE"] = "wh-endpoint-hash-table"
     os.environ["ENDPOINT"] = "nfl"
     os.environ["BUCKET"] = "futures-wh-sls"
     os.environ["WH_API"] = "https://odds.us.williamhill.com/api/v1/events?competitionId=007d7c61-07a7-4e18-bb40-15104b6eac92"

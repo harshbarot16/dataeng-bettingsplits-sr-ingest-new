@@ -60,7 +60,8 @@ def process_wh_file(data, table, bucket, s3, endpoint):
     """ process william hill file """
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
-    hexdig = hashlib.md5(json.dumps(data).encode()).hexdigest()
+    tnmt_data = [tnmt for tnmt in data if tnmt['eventType'] == 'TNMT']
+    hexdig = hashlib.md5(json.dumps(tnmt_data).encode()).hexdigest()
     try:
         result = table.get_item(Key={"endpoint": endpoint})
     except ClientError as ce:
@@ -73,7 +74,7 @@ def process_wh_file(data, table, bucket, s3, endpoint):
                 logger.info("hashes are not equal inserting into s3")
                 try:
                     s3.put_object(
-                        Bucket=bucket, Body=json.dumps(data), Key=endpoint,
+                        Bucket=bucket, Body=json.dumps(tnmt_data), Key=endpoint,
                     )
                 except ClientError as ce:
                     status_code = 501
@@ -109,7 +110,7 @@ def process_wh_file(data, table, bucket, s3, endpoint):
             logger.info("persisting futures response and new hash value")
             try:
                 s3.put_object(
-                    Bucket=bucket, Body=json.dumps(data), Key=endpoint,
+                    Bucket=bucket, Body=json.dumps(tnmt_data), Key=endpoint,
                 )
             except ClientError as ce:
                 status_code = 501
