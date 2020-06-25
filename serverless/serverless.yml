@@ -41,6 +41,7 @@ functions:
     handler: ${self:provider.environment.HANDLER}
     environment:
       WH_API: 'https://odds.us.williamhill.com/api/v1/events?competitionId=007d7c61-07a7-4e18-bb40-15104b6eac92'
+      ENDPOINT: 'nfl'
     events:
       - schedule: ${self:provider.environment.SCHEDULE}
 
