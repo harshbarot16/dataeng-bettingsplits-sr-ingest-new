@@ -13,7 +13,7 @@ provider:
     SCHEDULE: rate(3 hour)
     DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}-endpoint-hash-table
     BUCKET: ${self:service}-${opt:stage, self:provider.stage}
-    XAPIKEY: 'mY0kp8q5a0XZjJMMO5XgSahREQ7PaUxkGluWiLPi'
+    XAPIKEY: 'XbiOHGfBxxvSmXBQdb6vF3gZ9P3DWUgHVmmrRpSe'
   stage: ${opt:stage, 'dev'}
   region: us-east-1
   timeout: 60
