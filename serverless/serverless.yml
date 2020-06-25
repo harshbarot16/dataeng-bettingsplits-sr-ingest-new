@@ -10,7 +10,7 @@ provider:
     lambda: true
   environment:
     HANDLER: src/handler/get_futures.get_futures
-    SCHEDULE: rate(3 hour)
+    SCHEDULE: rate(3 hours)
     DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}-endpoint-hash-table
     BUCKET: ${self:service}-${opt:stage, self:provider.stage}
     XAPIKEY: 'XbiOHGfBxxvSmXBQdb6vF3gZ9P3DWUgHVmmrRpSe'

@@ -3,14 +3,10 @@ Description: QA CI/CD pipeline
 Parameters:
   ProjectName:
     Type: String
-  PythonImage:
+  UImage:
     Description: CodeBuild container image
     Type: String
-    Default: aws/codebuild/python:3.7.1
-  NodeImage:
-    Description: CodeBuild container image
-    Type: String
-    Default: aws/codebuild/nodejs:10.1.0
+    Default: aws/codebuild/standard:4.0
   ComputeType:
     Description: CodeBuild compute type
     Type: String
@@ -37,7 +33,7 @@ Resources:
         Type: CODEPIPELINE
       Environment:
         ComputeType: !Ref ComputeType
-        Image: !Ref PythonImage
+        Image: !Ref UImage
         Type: LINUX_CONTAINER
         EnvironmentVariables:
           - Name: ENVIRONMENT
@@ -55,7 +51,7 @@ Resources:
         Type: CODEPIPELINE
       Environment:
         ComputeType: !Ref ComputeType
-        Image: !Ref NodeImage
+        Image: !Ref UImage
         Type: LINUX_CONTAINER
         EnvironmentVariables:
           - Name: ENVIRONMENT
