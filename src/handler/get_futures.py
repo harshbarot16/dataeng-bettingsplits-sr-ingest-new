@@ -25,7 +25,7 @@ def get_futures(event, context):
         wh_api = os.environ["WH_API"]
         x_api_key = os.environ["XAPIKEY"]
     except KeyError as key_error:
-        message = key_error
+        message = "KeyError"
         logger.error("%s", key_error)
     else:
         try:
