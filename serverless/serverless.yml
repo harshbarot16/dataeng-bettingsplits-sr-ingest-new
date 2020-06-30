@@ -1,4 +1,4 @@
-service: dataeng-futures-wh-sls
+service: dataeng-futures-wh
 
 package:
   individually: true
@@ -17,6 +17,7 @@ provider:
   stage: ${opt:stage, 'dev'}
   region: us-east-1
   timeout: 60
+  vpc: ${file(../config-${opt:stage, self:provider.stage}.yml):vpc}
 
   iamRoleStatements:
     - Effect: Allow
@@ -42,6 +43,22 @@ functions:
     environment:
       WH_API: 'https://odds.us.williamhill.com/api/v1/events?competitionId=007d7c61-07a7-4e18-bb40-15104b6eac92'
       ENDPOINT: 'nfl'
+    events:
+      - schedule: ${self:provider.environment.SCHEDULE}
+  # NBA
+  nba:
+    handler: ${self:provider.environment.HANDLER}
+    environment:
+      WH_API: 'https://odds.us.williamhill.com/api/v1/events?competitionId=5806c896-4eec-4de1-874f-afed93114b8c'
+      ENDPOINT: 'nba'
+    events:
+      - schedule: ${self:provider.environment.SCHEDULE}
+  # MLB
+  mlb:
+    handler: ${self:provider.environment.HANDLER}
+    environment:
+      WH_API: 'https://odds.us.williamhill.com/api/v1/events?competitionId=04f90892-3afa-4e84-acce-5b89f151063d'
+      ENDPOINT: 'mlb'
     events:
       - schedule: ${self:provider.environment.SCHEDULE}
 
