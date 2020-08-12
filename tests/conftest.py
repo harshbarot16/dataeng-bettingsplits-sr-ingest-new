@@ -45,5 +45,6 @@ def fix_environ():
     os.environ["DYNAMODB_TABLE"] = "wh-endpoint-hash-table"
     os.environ["ENDPOINT"] = "nfl"
     os.environ["BUCKET"] = "futures-wh-sls"
-    os.environ["WH_API"] = "https://odds.us.williamhill.com/api/v1/events?competitionId=007d7c61-07a7-4e18-bb40-15104b6eac92"
+    os.environ["WH_COMP_API"] = "https://odds.us.williamhill.com/api/v1/events?competitionId=007d7c61-07a7-4e18-bb40-15104b6eac92"
+    os.environ["WH_EVENT_API"] = "https://odds.us.williamhill.com/api/v1/events?eventId="
     os.environ["XAPIKEY"] = "XbiOHGfBxxvSmXBQdb6vF3gZ9P3DWUgHVmmrRpSe"
