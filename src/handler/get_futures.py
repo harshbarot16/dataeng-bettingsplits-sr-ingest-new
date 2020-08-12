@@ -84,7 +84,6 @@ def build_wh_file(data, wh_event_api, x_api_key):
 
 def process_wh_file(data, table, bucket, s3, endpoint):
     """ process william hill file """
-    # endpoint += "_test1"
     hexdig = hashlib.md5(json.dumps(data).encode()).hexdigest()
     try:
         result = table.get_item(Key={"endpoint": endpoint})
@@ -92,7 +91,6 @@ def process_wh_file(data, table, bucket, s3, endpoint):
         status_code = 501
         message = "dynamo get item error"
         logger.error(ce.response["Error"]["Code"])
-        logger.error(ce.response["Error"]["Message"])
     else:
         if "Item" in result and "hash_value" in result["Item"]:
             if result["Item"]["hash_value"] != hexdig:
