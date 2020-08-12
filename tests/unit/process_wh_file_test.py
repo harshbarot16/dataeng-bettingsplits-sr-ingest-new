@@ -7,7 +7,7 @@ import src.handler.get_futures
 
 def test_filtered_object(table, s3, environ):
     """ test filtered object """
-    data = json.loads('[{"eventType": "MATCH","id": 1}, {"eventType": "TNMT","id": 2}, {"eventType": "MATCH","id": 3}, {"eventType": "TNMT","id": 4}]')
+    data = json.loads('[{"eventType": "TNMT","id": 2}, {"eventType": "TNMT","id": 4}]')
     endpoint = "test_filter"
     bucket = os.environ["BUCKET"]
     status_code, message = src.handler.get_futures.process_wh_file(

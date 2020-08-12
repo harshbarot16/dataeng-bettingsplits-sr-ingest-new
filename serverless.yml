@@ -14,6 +14,7 @@ provider:
     DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}-endpoint-hash-table
     BUCKET: ${self:service}-${opt:stage, self:provider.stage}
     XAPIKEY: 'XbiOHGfBxxvSmXBQdb6vF3gZ9P3DWUgHVmmrRpSe'
+    WH_EVENT_API: 'https://odds.us.williamhill.com/api/v1/events?eventId='
   stage: ${opt:stage, 'dev'}
   region: us-east-1
   timeout: 60
@@ -40,7 +41,7 @@ functions:
   nfl:
     handler: ${self:provider.environment.HANDLER}
     environment:
-      WH_API: 'https://odds.us.williamhill.com/api/v1/events?competitionId=007d7c61-07a7-4e18-bb40-15104b6eac92'
+      WH_COMP_API: 'https://odds.us.williamhill.com/api/v1/events?includeMarkets=false&competitionId=007d7c61-07a7-4e18-bb40-15104b6eac92'
       ENDPOINT: 'nfl'
     events:
       - schedule: ${self:provider.environment.SCHEDULE}
@@ -48,7 +49,7 @@ functions:
   nba:
     handler: ${self:provider.environment.HANDLER}
     environment:
-      WH_API: 'https://odds.us.williamhill.com/api/v1/events?competitionId=5806c896-4eec-4de1-874f-afed93114b8c'
+      WH_COMP_API: 'https://odds.us.williamhill.com/api/v1/events?includeMarkets=false&competitionId=5806c896-4eec-4de1-874f-afed93114b8c'
       ENDPOINT: 'nba'
     events:
       - schedule: ${self:provider.environment.SCHEDULE}
@@ -56,7 +57,7 @@ functions:
   mlb:
     handler: ${self:provider.environment.HANDLER}
     environment:
-      WH_API: 'https://odds.us.williamhill.com/api/v1/events?competitionId=04f90892-3afa-4e84-acce-5b89f151063d'
+      WH_COMP_API: 'https://odds.us.williamhill.com/api/v1/events?includeMarkets=false&competitionId=04f90892-3afa-4e84-acce-5b89f151063d'
       ENDPOINT: 'mlb'
     events:
       - schedule: ${self:provider.environment.SCHEDULE}
@@ -64,7 +65,7 @@ functions:
   nhl:
     handler: ${self:provider.environment.HANDLER}
     environment:
-      WH_API: 'https://odds.us.williamhill.com/api/v1/events?competitionId=b7b715a9-c7e8-4c47-af0a-77385b525e09'
+      WH_COMP_API: 'https://odds.us.williamhill.com/api/v1/events?includeMarkets=false&competitionId=b7b715a9-c7e8-4c47-af0a-77385b525e09'
       ENDPOINT: 'nhl'
     events:
       - schedule: ${self:provider.environment.SCHEDULE}
@@ -72,7 +73,7 @@ functions:
   ncaaf:
     handler: ${self:provider.environment.HANDLER}
     environment:
-      WH_API: 'https://odds.us.williamhill.com/api/v1/events?competitionId=b7eda1b3-0170-4510-9616-1bce561d7aa7'
+      WH_COMP_API: 'https://odds.us.williamhill.com/api/v1/events?includeMarkets=false&competitionId=b7eda1b3-0170-4510-9616-1bce561d7aa7'
       ENDPOINT: 'ncaaf'
     events:
       - schedule: ${self:provider.environment.SCHEDULE}
@@ -80,7 +81,7 @@ functions:
   ncaab:
     handler: ${self:provider.environment.HANDLER}
     environment:
-      WH_API: 'https://odds.us.williamhill.com/api/v1/events?competitionId=d246a1dd-72bf-45d1-bc86-efc519fa8e90'
+      WH_COMP_API: 'https://odds.us.williamhill.com/api/v1/events?includeMarkets=false&competitionId=d246a1dd-72bf-45d1-bc86-efc519fa8e90'
       ENDPOINT: 'ncaab'
     events:
       - schedule: ${self:provider.environment.SCHEDULE}

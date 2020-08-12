@@ -58,7 +58,7 @@ def test_get_futures_httperror(environ):
     response = src.handler.get_futures.get_futures(None, None)
     assert response["statusCode"] == 403
     assert response["body"] == "nfl completed"
-    assert response["message"] == "failed to retrieve nfl"
+    assert response["message"] == "failed to retrieve events by competition for nfl"
 
 
 def url_open_http_error(urlopen):
