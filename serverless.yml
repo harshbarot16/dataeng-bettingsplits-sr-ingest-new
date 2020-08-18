@@ -1,4 +1,4 @@
-service: dataeng-futures-wh
+service: dataeng-futures-wh-ingest
 
 package:
   individually: true
@@ -88,10 +88,106 @@ functions:
 
 resources:
   Resources:
+    nflChangeTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: dataeng-wh-futures-ingest-nfl-topic
+    nbaChangeTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: dataeng-wh-futures-ingest-nba-topic
+    mlbChangeTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: dataeng-wh-futures-ingest-mlb-topic
+    nhlChangeTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: dataeng-wh-futures-ingest-nhl-topic
+    ncaafChangeTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: dataeng-wh-futures-ingest-ncaaf-topic
+    ncaabChangeTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: dataeng-wh-futures-ingest-ncaab-topic
+
+    changeTopicPolicy:
+      Type: AWS::SNS::TopicPolicy
+      Properties:
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Sid: AllowUploadBucketToPushNotificationEffect
+              Effect: Allow
+              Principal:
+                Service: s3.amazonaws.com
+              Action: sns:Publish
+              Resource: "*"
+        Topics:
+          - Ref: nbaChangeTopic
+          - Ref: mlbChangeTopic
+          - Ref: nflChangeTopic
+          - Ref: ncaafChangeTopic
+          - Ref: nhlChangeTopic
+          - Ref: ncaabChangeTopic
+
     whBucket:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:provider.environment.BUCKET}
+        NotificationConfiguration:
+          TopicConfigurations:
+            - Event: s3:ObjectCreated:*
+              Topic:
+                Ref: nflChangeTopic
+              Filter:
+                S3Key:
+                 Rules:
+                    - Name: prefix
+                      Value: nfl
+            - Event: s3:ObjectCreated:*
+              Topic:
+                Ref: nbaChangeTopic
+              Filter:
+                S3Key:
+                  Rules:
+                    - Name: prefix
+                      Value: nba
+            - Event: s3:ObjectCreated:*
+              Topic:
+                Ref: mlbChangeTopic
+              Filter:
+                S3Key:
+                  Rules:
+                    - Name: prefix
+                      Value: mlb
+            - Event: s3:ObjectCreated:*
+              Topic:
+                Ref: nhlChangeTopic
+              Filter:
+                S3Key:
+                  Rules:
+                    - Name: prefix
+                      Value: nhl
+            - Event: s3:ObjectCreated:*
+              Topic:
+                Ref: ncaafChangeTopic
+              Filter:
+                S3Key:
+                  Rules:
+                    - Name: prefix
+                      Value: ncaaf
+            - Event: s3:ObjectCreated:*
+              Topic:
+                Ref: ncaabChangeTopic
+              Filter:
+                S3Key:
+                  Rules:
+                    - Name: prefix
+                      Value: ncaab
+
     endpointHashTable:
       Type: AWS::DynamoDB::Table
       Properties:
