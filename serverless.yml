@@ -91,27 +91,27 @@ resources:
     nflChangeTopic:
       Type: AWS::SNS::Topic
       Properties:
-        TopicName: dataeng-wh-futures-ingest-nfl-topic
+        TopicName: 'dataeng-wh-futures-ingest-nfl-topic-${opt:stage, self:provider.stage}'
     nbaChangeTopic:
       Type: AWS::SNS::Topic
       Properties:
-        TopicName: dataeng-wh-futures-ingest-nba-topic
+        TopicName: 'dataeng-wh-futures-ingest-nba-topic-${opt:stage, self:provider.stage}'
     mlbChangeTopic:
       Type: AWS::SNS::Topic
       Properties:
-        TopicName: dataeng-wh-futures-ingest-mlb-topic
+        TopicName: 'dataeng-wh-futures-ingest-mlb-topic-${opt:stage, self:provider.stage}'
     nhlChangeTopic:
       Type: AWS::SNS::Topic
       Properties:
-        TopicName: dataeng-wh-futures-ingest-nhl-topic
+        TopicName: 'dataeng-wh-futures-ingest-nhl-topic-${opt:stage, self:provider.stage}'
     ncaafChangeTopic:
       Type: AWS::SNS::Topic
       Properties:
-        TopicName: dataeng-wh-futures-ingest-ncaaf-topic
+        TopicName: 'dataeng-wh-futures-ingest-ncaaf-topic-${opt:stage, self:provider.stage}'
     ncaabChangeTopic:
       Type: AWS::SNS::Topic
       Properties:
-        TopicName: dataeng-wh-futures-ingest-ncaab-topic
+        TopicName: 'dataeng-wh-futures-ingest-ncaab-topic-${opt:stage, self:provider.stage}'
 
     changeTopicPolicy:
       Type: AWS::SNS::TopicPolicy
