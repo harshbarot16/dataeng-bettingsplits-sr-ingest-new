@@ -135,6 +135,8 @@ resources:
 
     whBucket:
       Type: AWS::S3::Bucket
+      DependsOn:
+        - changeTopicPolicy
       Properties:
         BucketName: ${self:provider.environment.BUCKET}
         NotificationConfiguration:
