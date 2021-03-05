@@ -1,0 +1,96 @@
+service: dataeng-bettingsplits-sr-ingest
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: python3.7
+  tracing:
+    lambda: true
+  environment:
+    HANDLER: src/handler/bettingsplits_ingestion.get_game_ids
+    SCHEDULE: rate(15 minutes)
+    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}-endpoint-hash-table
+    BUCKET: ${self:service}-${opt:stage, self:provider.stage}
+    ACCESS_TOKEN : '15fe23dca68e90c740f708f89ec8c7aa67272051'
+    VENDOR_ACCESS_TOKEN : '50faf2503afd19c54d1173aa12b818aaa6732cbf'
+    API_KEY: 'e26sjmf2qr7jy83qqky4nx2w'
+  stage: ${opt:stage, 'dev'}
+  region: us-east-1
+  timeout: 60
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:GetObject
+        - s3:ListBucket
+      Resource: 'arn:aws:s3:::${self:provider.environment.BUCKET}/*'
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}'
+
+
+functions:
+  # NFL
+  nfl:
+    handler: ${self:provider.environment.HANDLER}
+    environment:
+      ENDPOINT: 'nfl'
+    events:
+      - schedule: ${self:provider.environment.SCHEDULE}
+  # NBA
+  nba:
+    handler: ${self:provider.environment.HANDLER}
+    environment:
+      ENDPOINT: 'nba'
+    events:
+      - schedule: ${self:provider.environment.SCHEDULE}
+  # MLB
+  mlb:
+    handler: ${self:provider.environment.HANDLER}
+    environment:
+      ENDPOINT: 'mlb'
+    events:
+      - schedule: ${self:provider.environment.SCHEDULE}
+  # NHL
+  nhl:
+    handler: ${self:provider.environment.HANDLER}
+    environment:
+      ENDPOINT: 'nhl'
+    events:
+      - schedule: ${self:provider.environment.SCHEDULE}
+
+resources:
+  Resources:
+    bettingsplitsBucket:
+      Type: AWS::S3::Bucket
+
+
+    endpointHashTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        AttributeDefinitions:
+          -
+            AttributeName: endpoint
+            AttributeType: S
+          -
+            AttributeName: "GameId"
+            AttributeType: N
+        KeySchema:
+          -
+            AttributeName: endpoint
+            KeyType: HASH
+          - AttributeName: "GameId"
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
