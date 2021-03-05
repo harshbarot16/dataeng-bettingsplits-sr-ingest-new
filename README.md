@@ -28,5 +28,5 @@ With your own personalized stackName (STAGE=usernameMMDD)
 The default serverless deploy creates a stack named ${self:service}-${self:provider.stage}
 ```bash
 # Create new stack in scoring-dev account named: dataeng-bettingsplits-sr-ingest
-AWS_PROFILE=scoring-dev; STAGE=gwyman1108; serverless deploy --stage $STAGE --verbose --aws-s3-accelerate
+AWS_PROFILE=scoring-dev; STAGE=hkbaro0125; serverless deploy --stage $STAGE --verbose --aws-s3-accelerate
 ```
