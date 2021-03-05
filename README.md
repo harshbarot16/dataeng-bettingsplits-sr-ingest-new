@@ -20,7 +20,7 @@ Requirements:
 ## Pipelines
 Pipelines are set up in  in dev, qa, and prod for automated deployments from github triggered by merge into master. They will be created by running:
 ```bash
-aws cloudformation create-stack --stack-name dataeng-futures-wh-ingest --template-body file://build/pipeline-qa.yml --capabilities CAPABILITY_NAMED_IAM --parameters '[{"ParameterKey":"ProjectName","ParameterValue":"dataeng-futures-wh-ingest"}]'
+aws cloudformation create-stack --stack-name dataeng-bettingsplits-sr-ingest --template-body file://build/pipeline-qa.yml --capabilities CAPABILITY_NAMED_IAM --parameters '[{"ParameterKey":"ProjectName","ParameterValue":"dataeng-bettingsplits-sr-ingest"}]'
 ```
 
 ## Deploy from local to dev
