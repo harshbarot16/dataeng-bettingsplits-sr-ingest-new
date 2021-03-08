@@ -16,7 +16,7 @@ provider:
     ACCESS_TOKEN : '15fe23dca68e90c740f708f89ec8c7aa67272051'
     VENDOR_ACCESS_TOKEN : '50faf2503afd19c54d1173aa12b818aaa6732cbf'
     API_KEY: 'e26sjmf2qr7jy83qqky4nx2w'
-  stage: ${opt:stage, 'dev'}
+  stage: ${opt:stage, 'qa'}
   region: us-east-1
   timeout: 60
 
