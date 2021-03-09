@@ -70,8 +70,81 @@ functions:
 
 resources:
   Resources:
+    nflChangeTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: 'dataeng-bettingsplits-ingest-nfl-topic-${opt:stage, self:provider.stage}'
+      nbaChangeTopic:
+        Type: AWS::SNS::Topic
+        Properties:
+          TopicName: 'dataeng-bettingsplits-ingest-nba-topic-${opt:stage, self:provider.stage}'
+      mlbChangeTopic:
+        Type: AWS::SNS::Topic
+        Properties:
+          TopicName: 'dataeng-bettingsplits-ingest-mlb-topic-${opt:stage, self:provider.stage}'
+      nhlChangeTopic:
+        Type: AWS::SNS::Topic
+        Properties:
+          TopicName: 'dataeng-bettingsplits-ingest-nhl-topic-${opt:stage, self:provider.stage}'
+
+      changeTopicPolicy:
+        Type: AWS::SNS::TopicPolicy
+        Properties:
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: AllowUploadBucketToPushNotificationEffect
+                Effect: Allow
+                Principal:
+                  Service: s3.amazonaws.com
+                Action: sns:Publish
+                Resource: "*"
+          Topics:
+            - Ref: nbaChangeTopic
+            - Ref: mlbChangeTopic
+            - Ref: nflChangeTopic
+            - Ref: nhlChangeTopic
+
     bettingsplitsBucket:
       Type: AWS::S3::Bucket
+      DependsOn:
+        - changeTopicPolicy
+        Properties:
+          BucketName: ${self:provider.environment.BUCKET}
+          NotificationConfiguration:
+            TopicConfigurations:
+              - Event: s3:ObjectCreated:*
+                Topic:
+                  Ref: nflChangeTopic
+                Filter:
+                  S3Key:
+                    Rules:
+                      - Name: prefix
+                        Value: nfl
+              - Event: s3:ObjectCreated:*
+                Topic:
+                  Ref: nbaChangeTopic
+                Filter:
+                  S3Key:
+                    Rules:
+                      - Name: prefix
+                        Value: nba
+              - Event: s3:ObjectCreated:*
+                Topic:
+                  Ref: mlbChangeTopic
+                Filter:
+                  S3Key:
+                    Rules:
+                      - Name: prefix
+                        Value: mlb
+              - Event: s3:ObjectCreated:*
+                Topic:
+                  Ref: nhlChangeTopic
+                Filter:
+                  S3Key:
+                    Rules:
+                      - Name: prefix
+                        Value: nhl
 
 
     endpointHashTable:
@@ -82,15 +155,10 @@ resources:
           -
             AttributeName: endpoint
             AttributeType: S
-          -
-            AttributeName: "GameId"
-            AttributeType: N
         KeySchema:
           -
             AttributeName: endpoint
             KeyType: HASH
-          - AttributeName: "GameId"
-            KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
