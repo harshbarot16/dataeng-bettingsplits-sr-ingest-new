@@ -65,8 +65,10 @@ def get_game_ids(event, context):
                 s3 = boto3.client("s3")
                 dynamodb = boto3.resource("dynamodb")
                 table = dynamodb.Table(table_name)
+                result = {}
                 for game_id in vendor_dict:
-                    status_code, message = get_betting_insights(game_id,vendor_dict,api_key,endpoint,table,bucket,s3)
+                    final_result, message, status_code = get_betting_insights(result,game_id,vendor_dict,api_key,endpoint)
+                status_code, message = dynamodb_hash_check(final_result, endpoint, table, bucket, s3)
 
     response = {
         "statusCode": status_code,
@@ -93,7 +95,7 @@ def build_betsplit_file(data,data_map):
             logger.info(message)
     return vendor_map
 
-def get_betting_insights(game_id,vendor_dict,api_key,endpoint,table,bucket,s3):
+def get_betting_insights(result,game_id,vendor_dict,api_key,endpoint):
     """ Get betting splits insights from Sports Radar API"""
     status_code = 500
     message = ""
@@ -103,7 +105,7 @@ def get_betting_insights(game_id,vendor_dict,api_key,endpoint,table,bucket,s3):
         req_game = urllib.request.Request(game_url)
         data_game = json.load(urllib.request.urlopen(req_game))
     except HTTPError as http_error:
-        message = "failed to retrieve game info for Game" + game_id+ "and endpoint" + endpoint
+        message = "failed to retrieve game info for Game" + str(game_id)+ "and endpoint" + endpoint
         logger.error(message)
         logger.error("%s %s", http_error.code, http_error.reason)
         status_code = http_error.code
@@ -111,87 +113,88 @@ def get_betting_insights(game_id,vendor_dict,api_key,endpoint,table,bucket,s3):
         message = "failed to decode json"
         logger.error(message)
     else:
+        game_ids_concat = str(game_id)+"_"+str(vendor_dict[game_id][1])+"_"+str(vendor_dict[game_id][2])
+        result[game_ids_concat] = data_game
+        status_code = 200
+        message = "json decoded successfully"
+    return result, message, status_code
+
+def dynamodb_hash_check(final_result, endpoint, table, bucket, s3):
+    try:
         """ Process betting splits data"""
-        hexdig = hashlib.md5(json.dumps(data_game).encode()).hexdigest()
-        try:
-            result = table.get_item(Key={"endpoint": endpoint, "GameId": game_id})
-        except ClientError as ce:
-            status_code = 501
-            message = "dynamo get item error"
-            logger.error(ce.response["Error"]["Code"])
-        else:
-            if "Item" in result and "hash_value" in result["Item"]:
-                if result["Item"]["hash_value"] != hexdig:
-                    logger.info("hashes are not equal inserting into s3")
-                    try:
-                        file_name = endpoint+"/"+str(game_id)+"_"+str(vendor_dict[game_id][1])+"_"+str(vendor_dict[game_id][2])
-                        s3.put_object(
-                            Bucket=bucket, Body=json.dumps(data_game), Key=file_name,
-                        )
-                    except ClientError as ce:
-                        status_code = 501
-                        message = "s3 put updated object error"
-                        logger.error(ce.response["Error"]["Code"])
-                    else:
-                        try:
-                            now = str(datetime.datetime.now())
-                            result = table.update_item(
-                                Key={"endpoint": endpoint, "GameId": game_id},
-                                UpdateExpression="SET hash_value=:hash_value, updatedAt=:updatedAt",
-                                ExpressionAttributeValues={
-                                    ":hash_value": hexdig,
-                                    ":updatedAt": now,
-                                },
-                            )
-                        except ClientError as ce:
-                            status_code = 501
-                            message = "dynamo update item error"
-                            logger.error(ce.response["Error"]["Code"])
-                        else:
-                            status_code = 200
-                            message = "dynamodb item updated with new hash value"
-                            logger.info(message)
-                            logger.info(hexdig)
-                else:
-                    status_code = 200
-                    message = "hashes are the same - no update to s3"
-                    logger.info(message)
-                    logger.info(hexdig)
-            else:
-                logger.info("no hash value to check against")
-                logger.info("persisting futures response and new hash value")
+        hexdig = hashlib.md5(json.dumps(final_result).encode()).hexdigest()
+        result = table.get_item(Key={"endpoint": endpoint})
+    except ClientError as ce:
+        status_code = 501
+        message = "dynamo get item error"
+        logger.error(ce.response["Error"]["Code"])
+    else:
+        if "Item" in result and "hash_value" in result["Item"]:
+            if result["Item"]["hash_value"] != hexdig:
+                logger.info("hashes are not equal inserting into s3")
                 try:
-                    file_name = endpoint+"/"+str(game_id)+"_"+str(vendor_dict[game_id][1])+"_"+str(vendor_dict[game_id][2])
+                    file_name = endpoint
                     s3.put_object(
-                        Bucket=bucket, Body=json.dumps(data_game), Key=file_name,
+                        Bucket=bucket, Body=json.dumps(final_result), Key=file_name,
                     )
                 except ClientError as ce:
                     status_code = 501
-                    message = "s3 put new object error"
+                    message = "s3 put updated object error"
                     logger.error(ce.response["Error"]["Code"])
                 else:
                     try:
-                        result = table.put_item(
-                            Item={
-                                "endpoint": endpoint,
-                                "GameId": game_id,
-                                "hash_value": str(hexdig),
-                                "updatedAt": str(datetime.datetime.now()),
-                            }
+                        now = str(datetime.datetime.now())
+                        result = table.update_item(
+                            Key={"endpoint": endpoint},
+                            UpdateExpression="SET hash_value=:hash_value, updatedAt=:updatedAt",
+                            ExpressionAttributeValues={
+                                ":hash_value": hexdig,
+                                ":updatedAt": now,
+                            },
                         )
                     except ClientError as ce:
                         status_code = 501
-                        message = "dynamo put item error"
+                        message = "dynamo update item error"
                         logger.error(ce.response["Error"]["Code"])
                     else:
                         status_code = 200
-                        message = "dynamodb item created with new hash value"
+                        message = "dynamodb item updated with new hash value"
                         logger.info(message)
                         logger.info(hexdig)
+            else:
+                status_code = 200
+                message = "hashes are the same - no update to s3"
+                logger.info(message)
+                logger.info(hexdig)
+        else:
+            logger.info("no hash value to check against")
+            logger.info("persisting futures response and new hash value")
+            try:
+                file_name = endpoint
+                s3.put_object(
+                    Bucket=bucket, Body=json.dumps(final_result), Key=file_name,
+                )
+            except ClientError as ce:
+                status_code = 501
+                message = "s3 put new object error"
+                logger.error(ce.response["Error"]["Code"])
+            else:
+                try:
+                    result = table.put_item(
+                        Item={
+                            "endpoint": endpoint,
+                            "hash_value": str(hexdig),
+                            "updatedAt": str(datetime.datetime.now()),
+                        }
+                    )
+                except ClientError as ce:
+                    status_code = 501
+                    message = "dynamo put item error"
+                    logger.error(ce.response["Error"]["Code"])
+                else:
+                    status_code = 200
+                    message = "dynamodb item created with new hash value"
+                    logger.info(message)
+                    logger.info(hexdig)
 
     return status_code, message
-
-
-
-
-
