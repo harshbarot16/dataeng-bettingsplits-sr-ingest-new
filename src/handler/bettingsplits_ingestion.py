@@ -32,7 +32,7 @@ def get_game_ids(event, context):
     else:
         try:
             start_dt = datetime.datetime.today().strftime('%Y%m%d')
-            end_dt = datetime.datetime.strftime((datetime.datetime.strptime(start_dt, '%Y%m%d') + datetime.timedelta(days=13)), '%Y%m%d')
+            end_dt = start_dt + datetime.timedelta(days=13)
             args = {"startDate": start_dt, "endDate": end_dt, "access_token": access_token, "fields": "data(gameId,scheduledTime,homeTeam,awayTeam)" }
             api_url = "http://sdf-api.cbssports.cloud/primpy/livescoring/league/games/"+endpoint+"?{}".format(urllib.parse.urlencode(args))
             req = urllib.request.Request(api_url)
