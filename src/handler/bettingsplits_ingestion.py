@@ -32,11 +32,15 @@ def get_game_ids(event, context):
     else:
         try:
             start_dt = datetime.datetime.today().strftime('%Y%m%d')
-            end_dt = start_dt + datetime.timedelta(days=13)
+            end_dt = datetime.datetime.strftime((datetime.datetime.strptime(start_dt, '%Y%m%d') + datetime.timedelta(days=13)), '%Y%m%d')
             args = {"startDate": start_dt, "endDate": end_dt, "access_token": access_token, "fields": "data(gameId,scheduledTime,homeTeam,awayTeam)" }
             api_url = "http://sdf-api.cbssports.cloud/primpy/livescoring/league/games/"+endpoint+"?{}".format(urllib.parse.urlencode(args))
             req = urllib.request.Request(api_url)
-            data = json.load(urllib.request.urlopen(req))
+            games_dict = json.load(urllib.request.urlopen(req))
+            if 'data' not in games_dict:
+                message = "failed to retrieve game ids for " + endpoint
+                logger.error(message)
+                status_code = 501
         except HTTPError as http_error:
             message = "failed to retrieve game ids for " + endpoint
             logger.error(message)
@@ -60,14 +64,15 @@ def get_game_ids(event, context):
                 message = "failed to decode json"
                 logger.error(message)
             else:
-                vendor_dict = build_betsplit_file(data,data_map)
-                s3 = boto3.client("s3")
-                dynamodb = boto3.resource("dynamodb")
-                table = dynamodb.Table(table_name)
-                result = {}
-                for game_id in vendor_dict:
-                    final_result, message, status_code = get_betting_insights(result,game_id,vendor_dict,api_key,endpoint)
-                status_code, message = dynamodb_hash_check(final_result, endpoint, table, bucket, s3)
+                if status_code == 500:
+                    vendor_dict = build_betsplit_file(games_dict,data_map)
+                    s3 = boto3.client("s3")
+                    dynamodb = boto3.resource("dynamodb")
+                    table = dynamodb.Table(table_name)
+                    result = {}
+                    for game_id in vendor_dict:
+                        final_result, message, status_code = get_betting_insights(result,game_id,vendor_dict,api_key,endpoint)
+                    status_code, message = dynamodb_hash_check(final_result, endpoint, table, bucket, s3)
 
     response = {
         "statusCode": status_code,
