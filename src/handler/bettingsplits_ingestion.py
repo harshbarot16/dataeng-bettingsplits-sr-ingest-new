@@ -21,7 +21,6 @@ def get_game_ids(event, context):
     message = ""
     try:
         table_name = os.environ["DYNAMODB_TABLE"]
-        start_dt = os.environ["START_DT"]
         access_token = os.environ["ACCESS_TOKEN"]
         vendor_token = os.environ["VENDOR_ACCESS_TOKEN"]
         endpoint = os.environ["ENDPOINT"]
@@ -32,9 +31,9 @@ def get_game_ids(event, context):
         logger.error("%s", key_error)
     else:
         try:
-            str_dt = datetime.datetime.strftime(start_dt, '%Y%m%d')
-            end_dt = datetime.datetime.strftime((datetime.datetime.strptime(str_dt, '%Y%m%d') + datetime.timedelta(days=13)), '%Y%m%d')
-            args = {"startDate": str_dt, "endDate": end_dt, "access_token": access_token, "fields": "data(gameId,scheduledTime,homeTeam,awayTeam)" }
+            start_dt = datetime.datetime.today().strftime(start_dt, '%Y%m%d')
+            end_dt = datetime.datetime.strftime((datetime.datetime.strptime(start_dt, '%Y%m%d') + datetime.timedelta(days=13)), '%Y%m%d')
+            args = {"startDate": start_dt, "endDate": end_dt, "access_token": access_token, "fields": "data(gameId,scheduledTime,homeTeam,awayTeam)" }
             api_url = "http://sdf-api.cbssports.cloud/primpy/livescoring/league/games/"+endpoint+"?{}".format(urllib.parse.urlencode(args))
             req = urllib.request.Request(api_url)
             data = json.load(urllib.request.urlopen(req))
