@@ -15,7 +15,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 def get_game_ids(event, context):
-    """ lambda handler to fetch game ids and their respective schedule start time from Primpy """
+    """ lambda handler to fetch game_ids, home_team_ids, away_team_ids and their respective schedule start time from Primpy """
     status_code = 500
     endpoint = ""
     message = ""
@@ -34,7 +34,7 @@ def get_game_ids(event, context):
             start_dt = datetime.datetime.today().strftime('%Y%m%d')
             end_dt = datetime.datetime.strftime((datetime.datetime.strptime(start_dt, '%Y%m%d') + datetime.timedelta(days=13)), '%Y%m%d')
             args = {"startDate": start_dt, "endDate": end_dt, "access_token": access_token, "fields": "data(gameId,scheduledTime,homeTeam,awayTeam)" }
-            api_url = "http://sdf-api.cbssports.cloud/primpy/livescoring/league/games/"+endpoint+"?{}".format(urllib.parse.urlencode(args))
+            api_url = "http://sdf-api.cbssports.cloud/primpy/livescoring/league/games/"+endpoint+"?{}".format(urllib.parse.urlencode(args))  # Primpy Endpoint for list of games schedule in next 14 days
             req = urllib.request.Request(api_url)
             games_dict = json.load(urllib.request.urlopen(req))
             if 'data' not in games_dict:
@@ -52,7 +52,7 @@ def get_game_ids(event, context):
         else:
             try:
                 map_args = {"access_token": vendor_token }
-                map_url ="http://sdf-api.cbssports.cloud/primpy/highlander/sradar/games/mappings/league/"+endpoint+"?{}".format(urllib.parse.urlencode(map_args))
+                map_url ="http://sdf-api.cbssports.cloud/primpy/highlander/sradar/games/mappings/league/"+endpoint+"?{}".format(urllib.parse.urlencode(map_args)) # Primpy Endpoint for mapping CBS Game_id with Vendor_id
                 req_map = urllib.request.Request(map_url)
                 data_map = json.load(urllib.request.urlopen(req_map))
             except HTTPError as http_error:
