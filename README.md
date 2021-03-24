@@ -1,6 +1,6 @@
 # Betting Splits Insights Ingestion
 
-Retrieve betting splits insights from Sports Radar. Ingestion is kicked off using Cloudwatch events hourly and dumped into s3 buckets. A dynamodb table tracks when files are updated.
+Retrieve betting splits insights from Sports Radar. Ingestion is kicked off using Cloudwatch events every 15 minutes and dumped into s3 buckets. A dynamodb table tracks when files are updated.
 
 ## Folder Structure
 
