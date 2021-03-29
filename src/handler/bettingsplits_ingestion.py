@@ -72,7 +72,8 @@ def get_game_ids(event, context):
                     result = {}
                     for game_id in vendor_dict:
                         final_result, message, status_code = get_betting_insights(result,game_id,vendor_dict,api_key,endpoint)
-                    status_code, message = dynamodb_hash_check(final_result, endpoint, table, bucket, s3)
+                    if final_result:
+                        status_code, message = dynamodb_hash_check(final_result, endpoint, table, bucket, s3)
 
     response = {
         "statusCode": status_code,
